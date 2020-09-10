@@ -1,0 +1,31 @@
+# DS_store
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
+
+# jupyter notebook
+.ipynb_checkpoints
+**/.ipynb_checkpoints
+
+## pycache
+__pycache__
+**/__pycache__/
+
+# venv
+venv
+
+# credential.json
+credential.json
+**/credential.json
+
+# vscode 
+.vscode
+launch.json
+settings.json
+
+# test
+test
+
+
+
