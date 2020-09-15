@@ -5,7 +5,7 @@ import ast
 
 # 데이터프레임 만들기
 # 다음문장에 해당 파일 집어넣기
-df = pd.read_csv("change.csv", encoding = 'utf8', header=None)
+df = pd.read_csv("C:\\Users\\user\\Desktop\\change_kospi_entire.csv", encoding = 'utf8', header=None)
 df = df.iloc[0:df.shape[0]-1,1:]
 df['상한가'] = [list() for x in range(len(df.index))]
 df['다음날수익률'] = [list() for x in range(len(df.index))]
@@ -33,4 +33,4 @@ df = df.sort_values(by='date',ascending=True).reset_index(drop=True)
 
 
 # 파일 추출
-df.to_csv("date_company_list.csv", encoding="utf-8-sig")
+df.to_csv("date_company_list_kospi_entire.csv", encoding="utf-8-sig")

@@ -24,8 +24,13 @@ credential.json
 launch.json
 settings.json
 
-# test
-test
+# data folder
+data
+**/data/
+/data/
+data/
+
+
 
 
 
