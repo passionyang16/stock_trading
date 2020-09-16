@@ -12,6 +12,7 @@ PATH = '/Users/jungyulyang/programming/stair_to_heaven/'
 # 데이터프레임 만들기
 # 다음문장에 해당 파일 집어넣기
 df = pd.read_csv(PATH + "catch_highest/data/extracted_data/change.csv", encoding = 'utf8', header=None)
+df = df.head(10)
 df = df.iloc[0:df.shape[0]-1,1:]
 df['내일날짜'] = [0 for x in range(len(df.index))]
 df['상한가'] = [list() for x in range(len(df.index))]
@@ -41,7 +42,7 @@ df = df.sort_values(by='date',ascending=True).reset_index(drop=True)
 
 for i in tqdm(range(df.shape[0]-1)):
     for j in df['상한가'][i]:
-        company_df = pd.read_csv(PATH + "catch_highest/data/stock_data/day_stock_data/%s.csv" % j)
+        company_df = pd.read_csv(PATH + "catch_highest/data/day_stock_data/%s.csv" % j)
         company_df = company_df.loc[:, ~company_df.columns.str.contains('^Unnamed')]
         company_df = company_df.dropna(how='all')
         company_df = company_df.sort_values(by='date',ascending=True).reset_index(drop=True)
@@ -50,4 +51,4 @@ for i in tqdm(range(df.shape[0]-1)):
         df['내일날짜'][i] = tomorrow.iloc[0][0]
     
 # 파일 추출
-df.to_csv(PATH + "catch_highest/data/extracted_data/date_company_list.csv", encoding="utf-8-sig")
+df.to_csv(PATH + "catch_highest/data/extracted_data/test_date_company_list.csv", encoding="utf-8-sig")
