@@ -17,6 +17,7 @@ file_list.sort()
 else:
     None
 
+
 #첫번째 파일인 20180912 네이처셀으로 우선 뼈대 구성
 first_file_name = file_list[0][0:-4]
 df = pd.read_csv(PATH + "catch_highest/data/minute_stock_data/" + file_list[0], usecols=['time','open'])
