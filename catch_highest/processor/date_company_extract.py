@@ -7,7 +7,7 @@ warnings.filterwarnings(action='ignore')
 
 
 #해당 폴더 들어가기 전까지의 본인의 path 설정
-PATH = '/Users/jungyulyang/programming/stair_to_heaven/'
+PATH = 'c:\\Users\\passi\\Desktop\\programming\\stair_to_heaven'
 
 # 데이터프레임 만들기
 # 다음문장에 해당 파일 집어넣기

@@ -7,12 +7,12 @@ import warnings
 warnings.filterwarnings(action='ignore') 
 
 #해당 폴더 들어가기 전까지의 본인의 path 설정
-PATH = '/Users/jungyulyang/programming/stair_to_heaven/'
+PATH = 'c:\\Users\\passi\\Desktop\\programming\\stair_to_heaven'
 
 #분봉 데이터 파일들을 모두 리스트에 넣기
 file_list = os.listdir(PATH + "catch_highest/data/minute_stock_data/")
 file_list.sort()
-if '.DS_Store' in file_list:
+# if '.DS_Store' in file_list:
     file_list = file_list[1:]
 else:
     None

@@ -1,7 +1,7 @@
 import win32com.client
 import pandas as pd
 
-PATH = '/Users/jungyulyang/programming/stair_to_heaven/'
+PATH = 'c:\\Users\\passi\\Desktop\\programming\\stair_to_heaven'
 
 # 연결 여부 체크
 objCpCybos = win32com.client.Dispatch("CpUtil.CpCybos")

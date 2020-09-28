@@ -3,7 +3,7 @@ import pandas as pd
 from tqdm import tqdm
 import ast
 
-PATH = '/Users/jungyulyang/programming/stair_to_heaven/'
+PATH = 'c:\\Users\\passi\\Desktop\\programming\\stair_to_heaven'
 
 # 연결 여부 체크
 objCpCybos = win32com.client.Dispatch("CpUtil.CpCybos")
