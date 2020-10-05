@@ -78,10 +78,6 @@ df = df.reindex(columns=cols)
 #날짜별 기업들의 수익률 평균내기
 df = df.groupby('date').mean().reset_index()
 
-#첫번째 행에 수익률에 곱하기 자기자본 (ex. 100) 해서 틀 만들기
-for i in range(df.shape[1]):
-    df.iloc[i][1] = 100*(1+df.iloc[i][1])
-
 # date와 나머지 열을 쪼개서 각각 temp, temp2에 저장
 temp = df.iloc[:,0]
 temp2 = df.iloc[:,1:]
