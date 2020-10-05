@@ -7,7 +7,7 @@ import warnings
 warnings.filterwarnings(action='ignore') 
 
 #해당 폴더 들어가기 전까지의 본인의 path 설정
-PATH = '/Users/jungyulyang/programming/stair_to_heaven/'
+PATH = 'c:\\Users\\passi\\Desktop\\programming\\stair_to_heaven\\'
 
 #분봉 데이터 파일들을 모두 리스트에 넣기
 file_list = os.listdir(PATH + "catch_highest/data/minute_stock_data/")
@@ -17,8 +17,19 @@ if '.DS_Store' in file_list:
 else:
     None
 
+#원하는 날짜만 설정
+#처음날짜
+for i in range(len(file_list)):
+    if file_list[i].startswith('20200401'):
+        file_list = file_list[i:]
+        break
+#끝날짜
+for i in reversed(range(len(file_list))):
+    if file_list[i].startswith('20200630'):
+        file_list = file_list[:i+1]
+        break
 
-#첫번째 파일인 20180912 네이처셀으로 우선 뼈대 구성
+#첫번째 파일로 뼈대 구성
 first_file_name = file_list[0][0:-4]
 df = pd.read_csv(PATH + "catch_highest/data/minute_stock_data/" + file_list[0], usecols=['time','open'])
 df.columns = ['time',first_file_name]

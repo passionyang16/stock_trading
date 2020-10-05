@@ -6,7 +6,7 @@ import warnings
 warnings.filterwarnings(action='ignore') 
 
 #해당 폴더 들어가기 전까지의 본인의 path 설정
-PATH = '/Users/jungyulyang/programming/stair_to_heaven/'
+PATH = 'c:\\Users\\passi\\Desktop\\programming\\stair_to_heaven\\'
 
 #상따 목록 불러오기
 df = pd.read_csv(PATH + "catch_highest/data/extracted_data/date_company_list_kosdaq.csv")
