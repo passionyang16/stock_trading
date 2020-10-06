@@ -18,8 +18,8 @@ else:
     None
 
 #원하는 날짜만 설정
-start_date = '20200803'
-end_date = '20200914'
+start_date = '20200901'
+end_date = '20200929'
 
 #처음날짜
 for i in range(len(file_list)):
@@ -106,7 +106,7 @@ for j in tqdm(temp2.columns):
 df = pd.concat([temp,temp2],axis=1)
 
 #해당 파일은 csv 파일로 변환
-df.to_csv(PATH + f"catch_highest/data/final_result/{start_date}_{end_date}_profit_with_time.csv", encoding='utf-8-sig')
+df.to_csv(PATH + 'catch_highest/data/final_result/{start_date}_{end_date}_profit_with_time.csv'.format(start_date, end_date), encoding='utf-8-sig')
 
 #수익이 가장 극대화되는 시간대와 수익률
 target_time = int(df.iloc[:,1:].max(axis=0).idxmax())
