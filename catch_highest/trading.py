@@ -41,37 +41,34 @@ class CatchHighest:
         self.objBuySell = win32com.client.Dispatch('CpTrade.CpTd0311')  # 매매 API 따오기
         self.objAmount = win32com.client.Dispatch('CpTrade.CpTdNew5331A') #수량 API 따오기
         self.objAccount = win32com.client.Dispatch('CpTrade.CpTd6033') #계좌 API 따오기
-        # self.yesterday = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d') #어제 날짜 찾기
-        self.yesterday = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d') #어제 날짜 찾기
+        self.objRq = win32com.client.Dispatch("CpSysDib.CssStgFind")
+
+
         return
 
     #전날 상한가 종목을 return 하는 함수
     def get_yesterday_highest(self):
-        #날짜 설정
-        print(self.yesterday)
-        url = 'https://puzizig.com/programs/stock_upper_limit/date/' + self.yesterday
-        #URL 접근
-        request = requests.get(url)
-        soup = BeautifulSoup(request.content,'html.parser')
-        selected = soup.select('body > div > div > div.col-md-8.mt-3 > div:nth-child(4)')
-        #코드 및 종목 찾기
+        
+        self.objRq.SetInputValue(0, 'nyHoIn7oTgSILXpSOTqkuQ')  # 전략 id 요청
+        self.objRq.BlockRequest()
+
+        # 통신 및 통신 에러 처리
+        rqStatus = self.objRq.GetDibStatus()
+        if rqStatus != 0:
+            rqRet = self.objRq.GetDibMsg1()
+            print("통신상태", rqStatus, rqRet)
+
+        cnt = self.objRq.GetHeaderValue(0)  # 0 - (long) 검색된 결과 종목 수
+
         code = []
-        company = []
-        info_html = selected[0].find_all('div',{'class':'d-flex align-items-center mb-2'})
-        for info in info_html:
-            code.append('A' + info.find('span',{'class':'badge badge-secondary badge-pill mr-2'}).text)
-            company.append(info.find('a').text)
-        
-        #가격 찾아서 동전주는 깔끔하게 제거
-        table_html = selected[0].find_all('div',{'class':'col-md-6 col-lg-3'})
-        price = [table.text[5:].replace(',','') for table in table_html if table.text.startswith('현재가')]
-        # 거래량 데이터 추후 단일가 제거시 사용 가능
-        # amount = [table.text[5:].replace(',','') for table in table_html if table.text.startswith('거래량')]
-        for i in reversed(range(len(code))):
-            if len(price[i]) <= 3:
-                code.pop(i)
-        
-        print("어제 상한가 종목은: ", company)
+        name = []
+
+        for i in range(cnt):
+            code.append(self.objRq.GetDataValue(0, i))
+            name.append(g_objCodeMgr.CodeToName(code[i]))
+
+
+        print(name)
         return code
 
     #데이터를 받아서 모아놓는 함수

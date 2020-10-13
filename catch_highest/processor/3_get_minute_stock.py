@@ -67,7 +67,7 @@ stock_list_date = df2['상한가다음날'].tolist()
 
 #분봉 데이터 뽑기
 for i in tqdm(range(len(stock_list_date))):
-    if stock_list_date[i] > 20180911:
+    if stock_list_date[i] > 20201001:
         
         try:
             for j in range(len(stock_list_name[i])):
