@@ -41,12 +41,14 @@ class CatchHighest:
         self.objBuySell = win32com.client.Dispatch('CpTrade.CpTd0311')  # 매매 API 따오기
         self.objAmount = win32com.client.Dispatch('CpTrade.CpTdNew5331A') #수량 API 따오기
         self.objAccount = win32com.client.Dispatch('CpTrade.CpTd6033') #계좌 API 따오기
+        # self.yesterday = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d') #어제 날짜 찾기
         self.yesterday = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d') #어제 날짜 찾기
         return
 
     #전날 상한가 종목을 return 하는 함수
     def get_yesterday_highest(self):
         #날짜 설정
+        print(self.yesterday)
         url = 'https://puzizig.com/programs/stock_upper_limit/date/' + self.yesterday
         #URL 접근
         request = requests.get(url)
@@ -99,7 +101,6 @@ class CatchHighest:
         curData['매수금액'] = curData['예수금'] // num
         curData['수량'] = curData['매수금액'] // curData['전일종가']
         
-        print(curData)
         return curData
     
     
@@ -112,8 +113,8 @@ class CatchHighest:
         self.objBuySell.SetInputValue(3, curData['코드'])  # 종목코드
         self.objBuySell.SetInputValue(4, curData['수량'])  # 수량
         self.objBuySell.SetInputValue(5, 0)  # 주문단가
-        self.objBuyOrder.SetInputValue(7, "0") # 주문 조건 구분 코드 - 0:기본 1:IOC 2:FOK
-        self.objBuyOrder.SetInputValue(8, "03")
+        self.objBuySell.SetInputValue(7, "0") # 주문 조건 구분 코드 - 0:기본 1:IOC 2:FOK
+        self.objBuySell.SetInputValue(8, "03")
 
 
         # 주문 요청
@@ -130,17 +131,18 @@ class CatchHighest:
         return True
 
 
-    def sellOrder(self):
+    def sellOrder(self, code, amount):
+
 
         #원하는 주문 방식
         self.objBuySell.SetInputValue(0, '1')  # 1 매도 2 매수
         self.objBuySell.SetInputValue(1, self.acc)  # 계좌번호
         self.objBuySell.SetInputValue(2, self.accFlag[0])  # 상품구분 - 주식 상품 중 첫번째
-        self.objBuySell.SetInputValue(3, curData['코드'])  # 종목코드
-        self.objBuySell.SetInputValue(4, curData['수량'])  # 수량
+        self.objBuySell.SetInputValue(3, code)  # 종목코드
+        self.objBuySell.SetInputValue(4, amount)  # 수량
         self.objBuySell.SetInputValue(5, 0)  # 주문단가
-        self.objBuyOrder.SetInputValue(7, "0") # 주문 조건 구분 코드 - 0:기본 1:IOC 2:FOK
-        self.objBuyOrder.SetInputValue(8, "03")
+        self.objBuySell.SetInputValue(7, "0") # 주문 조건 구분 코드 - 0:기본 1:IOC 2:FOK
+        self.objBuySell.SetInputValue(8, "03")
 
 
         # 주문 요청
@@ -151,7 +153,7 @@ class CatchHighest:
         if rqStatus != 0:
             return False
 
-        print('신규 매도', '종목명:', curData['종목명'], '수량:', curData['수량'])
+        print('신규 매도', '종목명:', g_objCodeMgr.CodeToName(code), '수량:', amount)
 
         return True
 
@@ -165,27 +167,24 @@ if __name__ == "__main__":
     codes = catchhighest.get_yesterday_highest()
     buyStock = True
     sellStock = True
-    
+    stock_dict = {}
     #매수 주문
     while buyStock:
-        current_time = str(datetime.now().hour)+':'+str(datetime.now().minute)+':',str(datetime.now().second)
-        print('현재시간: ' + current_time)
-        if current_time == '8:59:30':
+        current_time = str(datetime.now().hour)+':'+str(datetime.now().minute)+':'+str(datetime.now().second)
+        if current_time == '8:59:0':
             for code in codes:
                 curData = catchhighest.request(code, len(codes))
+                print(curData)
                 catchhighest.buyOrder(curData)
+                stock_dict[code] = curData['수량']
             buyStock = False
 
+    print(stock_dict)
     #매도 주문
     while sellStock:
-        current_time = str(datetime.now().hour)+':'+str(datetime.now().minute)+':',str(datetime.now().second)
-        print('현재시간: ' + current_time)
-        if current_time == '9:08:00':
-            for code in codes:
-                curData = catchhighest.request(code, len(codes))
-                catchhighest.sellOrder(curData)
+        current_time = str(datetime.now().hour)+':'+str(datetime.now().minute)+':'+str(datetime.now().second)
+        print(current_time)
+        if current_time == '9:7:0':
+            for key,value in stock_dict.items():
+                catchhighest.sellOrder(key, value)
             sellStock = False
-
-    
-    
-    
