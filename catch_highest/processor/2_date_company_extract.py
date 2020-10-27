@@ -11,7 +11,7 @@ PATH = 'c:\\Users\\passi\\Desktop\\programming\\stair_to_heaven\\'
 
 # 데이터프레임 만들기
 # 다음문장에 해당 파일 집어넣기
-df = pd.read_csv(PATH + "catch_highest/data/extracted_data/change.csv", encoding = 'utf8', header=None)
+df = pd.read_csv(PATH + "catch_highest/data/extracted_data/20201027_stockchange_100days_before.csv", encoding = 'utf8', header=None)
 df = df.iloc[0:df.shape[0]-1,1:]
 df['내일날짜'] = [0 for x in range(len(df.index))]
 df['상한가'] = [list() for x in range(len(df.index))]
@@ -53,4 +53,4 @@ for i in tqdm(range(0,df.shape[0]-1)):
 #         df['내일날짜'][i] = tomorrow.iloc[0][1]
     
 # 파일 추출
-df.to_csv(PATH + "catch_highest/data/extracted_data/date_company_list.csv", encoding="utf-8-sig")
+df.to_csv(PATH + "catch_highest/data/extracted_data/20201027_date_company_list.csv", encoding="utf-8-sig")

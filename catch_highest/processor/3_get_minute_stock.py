@@ -3,6 +3,7 @@ import pandas as pd
 from tqdm import tqdm
 import time
 import ast
+import json
 
 PATH = 'c:\\Users\\passi\\Desktop\\programming\\stair_to_heaven\\'
 
@@ -13,35 +14,21 @@ if (bConnect == 0):
     print("PLUS가 정상적으로 연결되지 않음.")
     exit()
 
-# 저장된 파일을 불러서 코스피, 코스닥 종목들의 코드와 이름을 변수에 저장
-df = pd.read_csv(PATH + "catch_highest/data/extracted_data/kospi_kosdaq_list.csv")
-df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+def get_entire_code():
+    with open(PATH + "catch_highest/data/extracted_data/kospi_list.json") as kospi_file:
+        kospi_data = json.load(kospi_file)
 
-#na 값들은 제거하고 list 형태로 변환, 해당 변수에 저장
-kospicode = df['kospicode'].dropna().tolist()
-kospiname = df['kospiname'].dropna().tolist()
-kospicode_entire = df['kospicode_entire'].dropna().tolist()
-kospiname_entire = df['kospiname_entire'].dropna().tolist()
-kosdaqcode = df['kosdaqcode'].dropna().tolist()
-kosdaqname = df['kosdaqname'].dropna().tolist()
-
-#코드 6자리 맞추기
-kospicode = list(map(int, kospicode))
-kosdaqcode = list(map(int, kosdaqcode))
-kosdaqcode = list(map(str,kosdaqcode))
-
-for i in range(len(kosdaqcode)):
-    if len(kosdaqcode[i]) != 6:
-        kosdaqcode[i] = kosdaqcode[i].zfill(6)
+    with open(PATH + "catch_highest/data/extracted_data/kosdaq_list.json") as kosdaq_file:
+        kosdaq_data = json.load(kosdaq_file)
     
-    kosdaqcode[i] = 'A' + kosdaqcode[i]
+    kospi_data.update(kosdaq_data)
 
-# 코스피 코스닥 합치기
-integrated_code = kospicode_entire+kosdaqcode
-integrated_name = kospiname_entire+kosdaqname
+    return list(kospi_data.keys()), list(kospi_data.values())
+
+integrated_code, integrated_name = get_entire_code()
 
 # 상따 목록 불러오기
-df2 = pd.read_csv(PATH + "catch_highest/data/extracted_data/date_company_list.csv")
+df2 = pd.read_csv(PATH + "catch_highest/data/extracted_data/20201027_date_company_list.csv")
 df2 = df2.loc[:, ~df2.columns.str.contains('^Unnamed')]
 
 for i in range(df2.shape[0]):
@@ -50,25 +37,13 @@ for i in range(df2.shape[0]):
 df2 = df2[['내일날짜', '상한가']]
 df2.columns = ['상한가다음날', '상한가종목']
 
-# #딕셔너리 형태로 저장
-# SD_dic={}
-# for i in range(len(df2)):
-#     SD_dic[df2['상한가다음날'][i]]=df2['상한가종목'][i]
-
-# stock_list_name = []
-# stock_list_date = []
-# for i in SD_dic.keys():
-#     stock_list_date.append(i)
-# for j in SD_dic.values():
-#     stock_list_name.append(j)
 stock_list_name = df2['상한가종목'].tolist()
 stock_list_date = df2['상한가다음날'].tolist()
 
 
 #분봉 데이터 뽑기
 for i in tqdm(range(len(stock_list_date))):
-    if stock_list_date[i] > 20201001:
-        
+    if stock_list_date[i] > 20200831:
         try:
             for j in range(len(stock_list_name[i])):
                 times = []
@@ -118,7 +93,7 @@ for i in tqdm(range(len(stock_list_date))):
                      'open': open_price,
                      'high': high_price,
                      'low': low_price,
-                     'close': close_price})
+                     'close': close_price}, columns = ['time','open','high','low','close'])
                 df3.to_csv(PATH + "catch_highest/data/minute_stock_data/" + str(stock_list_date[i]) + '_' + integrated_name[integrated_code.index(code)] + '.csv',
                     encoding='utf-8-sig')
         except Exception as e:

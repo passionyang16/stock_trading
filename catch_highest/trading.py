@@ -67,7 +67,7 @@ class CatchHighest:
             code.append(self.objRq.GetDataValue(0, i))
             name.append(g_objCodeMgr.CodeToName(code[i]))
 
-
+        print(code)
         print(name)
         return code
 
@@ -168,7 +168,7 @@ if __name__ == "__main__":
     #매수 주문
     while buyStock:
         current_time = str(datetime.now().hour)+':'+str(datetime.now().minute)+':'+str(datetime.now().second)
-        if current_time == '8:59:0':
+        if current_time == '8:58:58':
             for code in codes:
                 curData = catchhighest.request(code, len(codes))
                 print(curData)
@@ -180,7 +180,6 @@ if __name__ == "__main__":
     #매도 주문
     while sellStock:
         current_time = str(datetime.now().hour)+':'+str(datetime.now().minute)+':'+str(datetime.now().second)
-        print(current_time)
         if current_time == '9:7:0':
             for key,value in stock_dict.items():
                 catchhighest.sellOrder(key, value)

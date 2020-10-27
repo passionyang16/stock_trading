@@ -11,34 +11,8 @@ if (bConnect == 0):
     print("PLUS가 정상적으로 연결되지 않음.")
     exit()
 
-# 저장된 파일을 불러서 코스피, 코스닥 종목들의 코드와 이름을 변수에 저장
-df = pd.read_csv(PATH + "catch_highest/data/extracted_data/kospi_kosdaq_list.csv")
-df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
-
-#na 값들은 제거하고 list 형태로 변환, 해당 변수에 저장
-kospicode = df['kospicode'].dropna().tolist()
-kospiname = df['kospiname'].dropna().tolist()
-kospicode_entire = df['kospicode_entire'].dropna().tolist()
-kospiname_entire = df['kospiname_entire'].dropna().tolist()
-kosdaqcode = df['kosdaqcode'].dropna().tolist()
-kosdaqname = df['kosdaqname'].dropna().tolist()
-
-#코드 6자리 맞추기
-kospicode = list(map(int, kospicode))
-kosdaqcode = list(map(int, kosdaqcode))
-kosdaqcode = list(map(str,kosdaqcode))
-for i in range(len(kosdaqcode)):
-    if len(kosdaqcode[i]) != 6:
-        kosdaqcode[i] = kosdaqcode[i].zfill(6)
-    
-    kosdaqcode[i] = 'A' + kosdaqcode[i]
-
-# 코스피 코스닥 합치기
-integrated_code = kospicode_entire+kosdaqcode
-integrated_name = kospiname_entire+kosdaqname
-
-
-
+integrated_code = ['A005930','A005380']
+integrated_name = ['삼성전자','현대차']
 # 날짜 데이터프레임 작성을 위해
 startpoint = 0
 # 데이터 갯수 설정
@@ -64,9 +38,6 @@ for code in tqdm(integrated_code):
         objStockChart.SetInputValue(9, ord('0'))  # 수정주가 사용
         objStockChart.BlockRequest()
         length = objStockChart.GetHeaderValue(3)
-
-        # print("날짜", "시가", "고가", "저가", "종가", "거래량")
-        # print("빼기빼기==============================================-")
 
         for i in range(length):
             day = objStockChart.GetDataValue(0, i)
@@ -99,6 +70,8 @@ for code in tqdm(integrated_code):
     except:
         print("Error:" + str(code))
 
-df.to_csv(PATH + "catch_highest/data/extracted_data/changee.csv", encoding='utf-8-sig')
-# df.reset_index(drop=True)
-print(df.index)
+df.to_csv(PATH + "catch_highest/data/extracted_data/changeee.csv", encoding='utf-8-sig')
+
+
+
+        

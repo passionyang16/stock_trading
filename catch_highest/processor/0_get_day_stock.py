@@ -12,25 +12,8 @@ if (bConnect == 0):
     print("PLUS가 정상적으로 연결되지 않음.")
     exit()
 
-def get_all_codes():
-    # 저장된 파일을 불러서 코스피, 코스닥 종목들의 코드와 이름을 변수에 저장
-    df = pd.read_csv(PATH + "catch_highest/data/extracted_data/kospi_kosdaq_list.csv")
-    df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
-
-    #na 값들은 제거하고 list 형태로 변환, 해당 변수에 저장
-    kospicode = list(map(str,df['kospicode_entire'].dropna().tolist()))
-    kosdaqcode = list(map(str,(map(int,df['kosdaqcode'].dropna().tolist()))))
-
-    for i in range(len(kosdaqcode)):
-        if len(kosdaqcode[i]) != 6:
-            kosdaqcode[i] = kosdaqcode[i].zfill(6)
-        kosdaqcode[i] = 'A' + kosdaqcode[i]
-
-    # 코스피 코스닥 합치기
-    integrated_code = kospicode+kosdaqcode
-
-    return integrated_code
-
+integrated_code = ['A005930','A005380']
+integrated_name = ['삼성전자', '현대차']
 
 
 # 데이터 갯수 설정
@@ -56,8 +39,8 @@ for code in tqdm(integrated_code):
         objStockChart.SetInputValue(9, ord('0'))  # 수정주가 사용
         objStockChart.BlockRequest()
         length = objStockChart.GetHeaderValue(3)
-        # print(kosdaqname[kosdaqcode.index(code)])
 
+        #각 날짜별로 (?)
         for i in range(length):
             day = objStockChart.GetDataValue(0, i)
             open = objStockChart.GetDataValue(1, i)
@@ -71,14 +54,10 @@ for code in tqdm(integrated_code):
             open_price.append(open)
             high_price.append(high)
 
-        df = pd.DataFrame(
-            {'date': days,
-            'open': open_price,
-            'high': high_price,
-            'low': low_price,
-            'close': close_price})
+        df = pd.DataFrame({'date': days, 'open': open_price, 'high': high_price, 'low': low_price, 'close': close_price},
+        columns = ['date','open','high','low','close'])
         
-        df.to_csv(PATH + "catch_highest/data/day_stock_data/" + integrated_name[integrated_code.index(code)] + '.csv',
+        df.to_csv(PATH + "catch_highest/data/" + integrated_name[integrated_code.index(code)] + '.csv',
                     encoding='utf-8-sig')
     
     except Exception as e:
