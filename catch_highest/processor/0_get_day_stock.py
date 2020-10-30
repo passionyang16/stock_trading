@@ -12,8 +12,8 @@ if (bConnect == 0):
     print("PLUS가 정상적으로 연결되지 않음.")
     exit()
 
-integrated_code = ['A005930','A005380']
-integrated_name = ['삼성전자', '현대차']
+integrated_code = ['A229200']
+integrated_name = ['kosdaq_150']
 
 
 # 데이터 갯수 설정
@@ -57,7 +57,7 @@ for code in tqdm(integrated_code):
         df = pd.DataFrame({'date': days, 'open': open_price, 'high': high_price, 'low': low_price, 'close': close_price},
         columns = ['date','open','high','low','close'])
         
-        df.to_csv(PATH + "catch_highest/data/" + integrated_name[integrated_code.index(code)] + '.csv',
+        df.to_csv(PATH + "catch_highest/data/extracted_data/" + integrated_name[integrated_code.index(code)] + '.csv',
                     encoding='utf-8-sig')
     
     except Exception as e:

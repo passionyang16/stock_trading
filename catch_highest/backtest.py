@@ -192,7 +192,7 @@ class BackTest:
             else:
                 continue
 
-    def time_profit_extract(self, num):
+    def time_profit_extract(self, fromdate, lower_limit, starttime = 0, priority = False, down = False):
         
         #분봉 데이터 파일들을 모두 리스트에 넣기
         file_list = os.listdir(self.PATH + "catch_highest/data/minute_stock_data/")
@@ -201,37 +201,65 @@ class BackTest:
             file_list = file_list[1:]
         else:
             None
+        # 숫자로 실행할때
+        # file_list.reverse()
+        # file_list = file_list[0:num]
+        # file_list.sort()
 
-        file_list.reverse()
-        file_list = file_list[0:num]
-        file_list.sort()
+        #처음날짜
+        for i in range(len(file_list)):
+            if file_list[i].startswith(str(fromdate)):
+                file_list = file_list[i:]
+                break
+        #끝날짜
+        for i in reversed(range(len(file_list))):
+            if file_list[i].startswith(self.today):
+                file_list = file_list[:i+1]
+                break
+        
+        # 우선주만 보자
+        if priority is True:
+            new_file_list = []
+            for i in range(len(file_list)):
+                if file_list[i].endswith('우.csv'):
+                    new_file_list.append(file_list[i])
+            file_list = new_file_list
 
-        # #처음날짜
-        # for i in range(len(file_list)):
-        #     if file_list[i].startswith(start_date):
-        #         file_list = file_list[i:]
-        #         break
-        # #끝날짜
-        # for i in reversed(range(len(file_list))):
-        #     if file_list[i].startswith(end_date):
-        #         file_list = file_list[:i+1]
-        #         break
+        #하락장일 때만 보자
+        if down is True:
+            df = pd.read_csv(self.PATH + "catch_highest/data/extracted_data/kosdaq_150.csv", usecols = ['date','open','close'])
+            array = []
+            for i in range(df.shape[0]-1):
+                if df['open'][i] < df['close'][i+1]:
+                    array.append(df['date'][i])
+            array = list(map(str, array))
+            new_file_list = []
+            for i in range(len(file_list)):
+                if file_list[i][0:8] in array:
+                    new_file_list.append(file_list[i])
+            file_list = new_file_list
 
-        #뼈대 구성
+
         df = pd.read_csv(self.PATH + "catch_highest/data/extracted_data/only_time.csv", usecols = ['time'])
+        for i in range(df.shape[0]):
+            if df['time'][i] == starttime:
+                df = pd.DataFrame(df['time'][i:]).reset_index(drop=True)
+                break
 
         for file in tqdm(file_list):
             file = file[0:-4]
             test = pd.read_csv(self.PATH + "catch_highest/data/minute_stock_data/%s.csv" % file, usecols=['time','open'])
             test.columns = ['time',file]
             test[file] = test[file].astype('int')
+            # 단일가 거래 거르고
             if test.shape[0] < 50:
                 continue
+            # 동전주 거르고
             if len(str(test[file][0])) == 3:
                 continue
                 
             df = pd.merge(df,test, on='time', how = 'left')
-
+            # 중간중간 vi 걸린 것들은 다음값으로 채워주고
             for i in range(df.shape[0]):
                 if np.isnan(df[file][i]):
                     index = i 
@@ -248,8 +276,13 @@ class BackTest:
                         continue
             
             for j in range(1,df.shape[0]):
-                value = round((df[file][j] - df[file][0]) / df[file][0],4)
-                df[file][j] = value
+                value = round((df[file][j] - df[file][0]) / df[file][0],4) - 0.0025
+                if value <= lower_limit:
+                    value = lower_limit
+                    df[file][j:] = value
+                    continue
+                else:
+                    df[file][j] = value
 
         #해당 날짜에 값이 없는 경우에는 모두 0으로 대체
         df = df.fillna(0)
@@ -263,6 +296,8 @@ class BackTest:
         df['date'] = [str() for x in range(len(df.index))]
         df['company'] = [str() for x in range(len(df.index))]
 
+        df.to_csv(self.PATH + 'catch_highest/data/final_result/no_band_{fromdate}_{today}_company_profit_with_time.csv'.format(fromdate = fromdate, today=self.today), encoding='utf-8-sig')
+
         for i in range(df.shape[0]):
             df['date'][i] = df['time'][i][0:8]
             df['company'][i] = df['time'][i][9:]
@@ -273,6 +308,8 @@ class BackTest:
 
         #날짜별 기업들의 수익률 평균내기
         df = df.groupby('date').mean().reset_index()
+        
+        df.to_csv(self.PATH + 'catch_highest/data/final_result/no_band_{fromdate}_{today}_only_mean_profit_with_time.csv'.format(fromdate = fromdate, today=self.today), encoding='utf-8-sig')
 
         # date와 나머지 열을 쪼개서 각각 temp, temp2에 저장
         temp = df.iloc[:,0]
@@ -286,12 +323,15 @@ class BackTest:
 
         #이제 다시 쪼개진 데이터프레임들 결합
         df = pd.concat([temp,temp2],axis=1)
-        df.to_csv(self.PATH + 'catch_highest/data/final_result/{today}_{num}before_profit_with_time.csv'.format(today=self.today, num=num), encoding='utf-8-sig')
+        df.to_csv(self.PATH + 'catch_highest/data/final_result/no_band_{fromdate}_{today}_profit_with_time.csv'.format(fromdate = fromdate, today=self.today), encoding='utf-8-sig')
 
         #수익이 가장 극대화되는 시간대와 수익률
+        df = pd.DataFrame(df.iloc[-1])
+        df = df.T
         target_time = int(df.iloc[:,1:].max(axis=0).idxmax())
         profit = round((df.iloc[:,1:].max(axis=0).max()/100),2)
         print('가장 수익률이 극대화되는 시간은 ' + str(target_time) + '이며, 수익률은 대략 ' + str(profit) + '배 정도 됩니다.')
+        return target_time, profit
 
     def get_yesterday_highest(self):
             
@@ -323,17 +363,8 @@ if __name__ == "__main__":
     #통신 확인
     if backtest.InitPlusCheck() == False:
         exit()
-    # 전체 코스피, 코스닥 코드 불러오기
-    entire_code, entire_name = backtest.get_entire_code()
-    code = backtest.get_yesterday_highest()
 
-    # 긴 기간을 구하고 싶을때
-    # change = backtest.get_change(entire_code, 100)
-    # date_company = date_company_extract(change)
+    target_time, profit = backtest.time_profit_extract(fromdate=20201012, lower_limit = -1, starttime=901, priority=True, down=False)
 
-    # 어제 상한가 종목 및 날짜 불러오기
-    date_company = pd.DataFrame([[backtest.today,code]],columns=['내일날짜','상한가다음날'])
-    # 해당 분봉 데이터 업데이트
-    backtest.get_minute_stock(date_company, entire_code, int(backtest.today))
-    # time 수익률 계산
-    backtest.time_profit_extract(200)
+
+
