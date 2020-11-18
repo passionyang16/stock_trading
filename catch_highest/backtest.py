@@ -192,7 +192,7 @@ class BackTest:
             else:
                 continue
 
-    def time_profit_extract(self, fromdate, lower_limit, starttime = 0, priority = False, down = False):
+    def time_profit_extract(self, fromdate, todate, lower_limit, starttime = 0, priority = False, down = False):
         
         #분봉 데이터 파일들을 모두 리스트에 넣기
         file_list = os.listdir(self.PATH + "catch_highest/data/minute_stock_data/")
@@ -213,7 +213,7 @@ class BackTest:
                 break
         #끝날짜
         for i in reversed(range(len(file_list))):
-            if file_list[i].startswith(self.today):
+            if file_list[i].startswith(str(todate)):
                 file_list = file_list[:i+1]
                 break
         
@@ -221,7 +221,7 @@ class BackTest:
         if priority is True:
             new_file_list = []
             for i in range(len(file_list)):
-                if file_list[i].endswith('우.csv'):
+                if file_list[i].endswith('우.csv') or file_list[i].endswith('우B.csv') or file_list[i].endswith('우C.csv'):
                     new_file_list.append(file_list[i])
             file_list = new_file_list
 
@@ -239,7 +239,7 @@ class BackTest:
                     new_file_list.append(file_list[i])
             file_list = new_file_list
 
-
+        #데이터 모두 합치기
         df = pd.read_csv(self.PATH + "catch_highest/data/extracted_data/only_time.csv", usecols = ['time'])
         for i in range(df.shape[0]):
             if df['time'][i] == starttime:
@@ -278,9 +278,8 @@ class BackTest:
             for j in range(1,df.shape[0]):
                 value = round((df[file][j] - df[file][0]) / df[file][0],4) - 0.0025
                 if value <= lower_limit:
-                    value = lower_limit
                     df[file][j:] = value
-                    continue
+                    break
                 else:
                     df[file][j] = value
 
@@ -296,7 +295,7 @@ class BackTest:
         df['date'] = [str() for x in range(len(df.index))]
         df['company'] = [str() for x in range(len(df.index))]
 
-        df.to_csv(self.PATH + 'catch_highest/data/final_result/no_band_{fromdate}_{today}_company_profit_with_time.csv'.format(fromdate = fromdate, today=self.today), encoding='utf-8-sig')
+        df.to_csv(self.PATH + 'catch_highest/data/final_result/{fromdate}_{todate}_{lower_limit}_company_profit_with_time.csv'.format(fromdate = fromdate, todate=todate, lower_limit=lower_limit), encoding='utf-8-sig')
 
         for i in range(df.shape[0]):
             df['date'][i] = df['time'][i][0:8]
@@ -309,7 +308,7 @@ class BackTest:
         #날짜별 기업들의 수익률 평균내기
         df = df.groupby('date').mean().reset_index()
         
-        df.to_csv(self.PATH + 'catch_highest/data/final_result/no_band_{fromdate}_{today}_only_mean_profit_with_time.csv'.format(fromdate = fromdate, today=self.today), encoding='utf-8-sig')
+        df.to_csv(self.PATH + 'catch_highest/data/final_result/{fromdate}_{todate}_{lower_limit}_only_mean_profit_with_time.csv'.format(fromdate = fromdate, todate=todate, lower_limit=lower_limit), encoding='utf-8-sig')
 
         # date와 나머지 열을 쪼개서 각각 temp, temp2에 저장
         temp = df.iloc[:,0]
@@ -323,7 +322,7 @@ class BackTest:
 
         #이제 다시 쪼개진 데이터프레임들 결합
         df = pd.concat([temp,temp2],axis=1)
-        df.to_csv(self.PATH + 'catch_highest/data/final_result/no_band_{fromdate}_{today}_profit_with_time.csv'.format(fromdate = fromdate, today=self.today), encoding='utf-8-sig')
+        df.to_csv(self.PATH + 'catch_highest/data/final_result/{fromdate}_{todate}_{lower_limit}_profit_with_time.csv'.format(fromdate = fromdate, todate=todate, lower_limit=lower_limit), encoding='utf-8-sig')
 
         #수익이 가장 극대화되는 시간대와 수익률
         df = pd.DataFrame(df.iloc[-1])
@@ -360,11 +359,8 @@ class BackTest:
 if __name__ == "__main__":
     #객체 생성
     backtest = BackTest()
-    #통신 확인
-    if backtest.InitPlusCheck() == False:
-        exit()
+    # #통신 확인
+    # if backtest.InitPlusCheck() == False:
+    #     exit()
 
-    target_time, profit = backtest.time_profit_extract(fromdate=20201012, lower_limit = -1, starttime=901, priority=True, down=False)
-
-
-
+    target_time, profit = backtest.time_profit_extract(fromdate=202009, todate = 202011, lower_limit = -3, starttime=901, priority=True, down=False)

@@ -2,3 +2,5 @@ pandas
 tqdm
 pypiwin32
 jupyter
+pywinauto
+pyautogui

@@ -11,19 +11,19 @@ if __name__ == "__main__":
 
     # 전체 코스피, 코스닥 코드 불러오기
     entire_code, entire_name = backtest.get_entire_code()
-    code = backtest.get_yesterday_highest()
+    # code = backtest.get_yesterday_highest()
     
-    # 어제 상한가 종목 및 날짜 불러오기
-    date_company = pd.DataFrame([[backtest.today,code]],columns=['내일날짜','상한가다음날'])
+    # # 어제 상한가 종목 및 날짜 불러오기
+    # date_company = pd.DataFrame([[backtest.today,code]],columns=['내일날짜','상한가다음날'])
 
-    # 해당 분봉 데이터 업데이트
-    backtest.get_minute_stock(date_company, entire_code, int(backtest.today))
+    # # 해당 분봉 데이터 업데이트
+    # backtest.get_minute_stock(date_company, entire_code, int(backtest.today))
 
     # 특정 날짜 빼먹었을 때 데이터 축적
-    # code = ['A00806K', 'A104040', 'A038460', 'A109610','A047770','A050090']
-    # specific_date = '20201028'
-    # date_company = pd.DataFrame([[specific_date,code]], columns = ['내일날짜','상한가다음날'])
-    # backtest.get_minute_stock(date_company, entire_code, int(specific_date))
+    code = ['A004835']
+    specific_date = '20201112'
+    date_company = pd.DataFrame([[specific_date,code]], columns = ['내일날짜','상한가다음날'])
+    backtest.get_minute_stock(date_company, entire_code, int(specific_date))
 
 
     # 긴 기간을 구하고 싶을때

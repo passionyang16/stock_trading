@@ -42,14 +42,12 @@ class CatchHighest:
         self.objAmount = win32com.client.Dispatch('CpTrade.CpTdNew5331A') #수량 API 따오기
         self.objAccount = win32com.client.Dispatch('CpTrade.CpTd6033') #계좌 API 따오기
         self.objRq = win32com.client.Dispatch("CpSysDib.CssStgFind")
-
-
         return
 
     #전날 상한가 종목을 return 하는 함수
     def get_yesterday_highest(self):
         
-        self.objRq.SetInputValue(0, 'nyHoIn7oTgSILXpSOTqkuQ')  # 전략 id 요청
+        self.objRq.SetInputValue(0, 'TUPtIK5aQWqlBlpmxTGAkA')  # 전략 id 요청
         self.objRq.BlockRequest()
 
         # 통신 및 통신 에러 처리
@@ -95,8 +93,8 @@ class CatchHighest:
         curData['전일종가'] = self.objStockMst.GetHeaderValue(10)  # 전일종가
         #추후 사용예정
         #curData['예상체결가'] = self.objStockMst.GetHeaderValue(55) # 예상체결가
-        curData['매수금액'] = curData['예수금'] // num
-        curData['수량'] = curData['매수금액'] // curData['전일종가']
+        curData['매수금액'] = (curData['예수금']) // num
+        curData['수량'] = curData['매수금액'] // (curData['전일종가']*1.3)
         
         return curData
     
@@ -168,7 +166,7 @@ if __name__ == "__main__":
     #매수 주문
     while buyStock:
         current_time = str(datetime.now().hour)+':'+str(datetime.now().minute)+':'+str(datetime.now().second)
-        if current_time == '8:58:58':
+        if current_time == '8:55:30':
             for code in codes:
                 curData = catchhighest.request(code, len(codes))
                 print(curData)
@@ -178,9 +176,18 @@ if __name__ == "__main__":
 
     print(stock_dict)
     #매도 주문
-    while sellStock:
+    # while first_sellStock:
+    #     current_time = str(datetime.now().hour)+':'+str(datetime.now().minute)+':'+str(datetime.now().second)
+    #     if current_time == '9:6:0':
+    #         for key, value in stock_dict.items():
+    #             new_value = value // 2
+    #             catchhighest.sellOrder(key, new_value)
+    #             stock_dict[key] = value - new_value
+    #         first_sellStock = False
+
+    while second_sellStock:
         current_time = str(datetime.now().hour)+':'+str(datetime.now().minute)+':'+str(datetime.now().second)
-        if current_time == '9:7:0':
-            for key,value in stock_dict.items():
+        if current_time == '9:6:0':
+            for key, value in stock_dict.items():
                 catchhighest.sellOrder(key, value)
-            sellStock = False
+            second_sellStock = False
