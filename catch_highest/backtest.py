@@ -248,40 +248,60 @@ class BackTest:
 
         for file in tqdm(file_list):
             file = file[0:-4]
-            test = pd.read_csv(self.PATH + "catch_highest/data/minute_stock_data/%s.csv" % file, usecols=['time','open'])
-            test.columns = ['time',file]
-            test[file] = test[file].astype('int')
+            test = pd.read_csv(PATH + "catch_highest/data/minute_stock_data/%s.csv" % file, usecols=['time','open','low'])
             # 단일가 거래 거르고
             if test.shape[0] < 50:
                 continue
             # 동전주 거르고
-            if len(str(test[file][0])) == 3:
+            if len(str(test['open'][0])) == 3:
                 continue
                 
-            df = pd.merge(df,test, on='time', how = 'left')
+            temp = pd.merge(df,test, on='time', how = 'left')
+            
             # 중간중간 vi 걸린 것들은 다음값으로 채워주고
-            for i in range(df.shape[0]):
-                if np.isnan(df[file][i]):
-                    index = i 
+            for i in range(temp.shape[0]):
+                if np.isnan(temp['open'][i]):
+                    index = i
                     stopping = True
                     try:
                         while stopping:
-                            if np.isnan(df[file][index+1]):
+                            if np.isnan(temp['open'][index+1]):
                                 index += 1
                             else:
-                                valid = df[file][index+1]
+                                valid = temp['open'][index+1]
                                 stopping = False
-                        df[file][i] = valid
+                        temp['open'][i] = valid
                     except:
                         continue
-            
-            for j in range(1,df.shape[0]):
-                value = round((df[file][j] - df[file][0]) / df[file][0],4) - 0.0025
-                if value <= lower_limit:
-                    df[file][j:] = value
+                
+                if np.isnan(temp['low'][i]):
+                    index = i
+                    stopping = True
+                    try:
+                        while stopping:
+                            if np.isnan(temp['low'][index+1]):
+                                index += 1
+                            else:
+                                valid = temp['low'][index+1]
+                                stopping = False
+                        temp['low'][i] = valid
+                    except:
+                        continue
+
+            for j in range(1,temp.shape[0]):
+                open_value = round((temp['open'][j] - temp['open'][0]) / temp['open'][0],4) - 0.0025
+                low_value = round((temp['low'][j] - temp['open'][0]) / temp['open'][0],4) - 0.0025
+
+                if low_value <= lower_limit:
+                    temp['open'][j:] = low_value
                     break
                 else:
-                    df[file][j] = value
+                    temp['open'][j] = open_value
+
+            temp = temp[['time','open']]
+            temp.rename(columns={'time':'time', 'open':file}, inplace=True)
+
+            df = pd.merge(df, temp, on='time', how='left')
 
         #해당 날짜에 값이 없는 경우에는 모두 0으로 대체
         df = df.fillna(0)
