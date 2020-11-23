@@ -192,7 +192,7 @@ class BackTest:
             else:
                 continue
 
-    def time_profit_extract(self, fromdate, todate, lower_limit, starttime = 0, priority = False, down = False):
+    def time_profit_extract(self, fromdate, todate, lower_limit, starttime = 0, priority = False, down = False, single = False):
         
         #분봉 데이터 파일들을 모두 리스트에 넣기
         file_list = os.listdir(self.PATH + "catch_highest/data/minute_stock_data/")
@@ -201,11 +201,7 @@ class BackTest:
             file_list = file_list[1:]
         else:
             None
-        # 숫자로 실행할때
-        # file_list.reverse()
-        # file_list = file_list[0:num]
-        # file_list.sort()
-
+        
         #처음날짜
         for i in range(len(file_list)):
             if file_list[i].startswith(str(fromdate)):
@@ -239,8 +235,13 @@ class BackTest:
                     new_file_list.append(file_list[i])
             file_list = new_file_list
 
+        # 단일가일때는 다르게 불러옴
+        if single:
+            df = pd.read_csv(self.PATH + "catch_highest/data/extracted_data/only_time_single_price.csv", usecols = ['time'])
+        else:
+            df = pd.read_csv(self.PATH + "catch_highest/data/extracted_data/only_time.csv", usecols = ['time'])
+
         #데이터 모두 합치기
-        df = pd.read_csv(self.PATH + "catch_highest/data/extracted_data/only_time.csv", usecols = ['time'])
         for i in range(df.shape[0]):
             if df['time'][i] == starttime:
                 df = pd.DataFrame(df['time'][i:]).reset_index(drop=True)
@@ -248,29 +249,34 @@ class BackTest:
 
         for file in tqdm(file_list):
             file = file[0:-4]
-            test = pd.read_csv(PATH + "catch_highest/data/minute_stock_data/%s.csv" % file, usecols=['time','open','low'])
-            # 단일가 거래 거르고
-            if test.shape[0] < 50:
-                continue
-            # 동전주 거르고
-            if len(str(test['open'][0])) == 3:
-                continue
-                
-            temp = pd.merge(df,test, on='time', how = 'left')
+            test = pd.read_csv(self.PATH + "catch_highest/data/minute_stock_data/%s.csv" % file, usecols=['time','open','low'])
+            test.columns = ['time',file,'low']
+            test[file] = test[file].astype('float') 
             
+            if single and len(test) < 20: 
+                pass
+            else:
+                if len(test) < 20:
+                    continue
+                if len(str(test[file][0])) == 3:
+                    continue
+            
+            temp = pd.merge(df,test, on='time', how = 'left')
+
+
             # 중간중간 vi 걸린 것들은 다음값으로 채워주고
             for i in range(temp.shape[0]):
-                if np.isnan(temp['open'][i]):
+                if np.isnan(temp[file][i]):
                     index = i
                     stopping = True
                     try:
                         while stopping:
-                            if np.isnan(temp['open'][index+1]):
+                            if np.isnan(temp[file][index+1]):
                                 index += 1
                             else:
-                                valid = temp['open'][index+1]
+                                valid = temp[file][index+1]
                                 stopping = False
-                        temp['open'][i] = valid
+                        temp[file][i] = valid
                     except:
                         continue
                 
@@ -289,18 +295,16 @@ class BackTest:
                         continue
 
             for j in range(1,temp.shape[0]):
-                open_value = round((temp['open'][j] - temp['open'][0]) / temp['open'][0],4) - 0.0025
-                low_value = round((temp['low'][j] - temp['open'][0]) / temp['open'][0],4) - 0.0025
+                open_value = round((temp[file][j] - temp[file][0]) / temp[file][0],4) - 0.0025
+                low_value = round((temp['low'][j] - temp[file][0]) / temp[file][0],4) - 0.0025
 
                 if low_value <= lower_limit:
-                    temp['open'][j:] = low_value
+                    temp[file][j:] = low_value
                     break
                 else:
-                    temp['open'][j] = open_value
+                    temp[file][j] = open_value
 
-            temp = temp[['time','open']]
-            temp.rename(columns={'time':'time', 'open':file}, inplace=True)
-
+            temp = temp[['time',file]]
             df = pd.merge(df, temp, on='time', how='left')
 
         #해당 날짜에 값이 없는 경우에는 모두 0으로 대체
@@ -314,6 +318,9 @@ class BackTest:
         #날짜와 기업 자르고 다시 재정렬
         df['date'] = [str() for x in range(len(df.index))]
         df['company'] = [str() for x in range(len(df.index))]
+
+        #필요없는 열 삭제
+        df = df.drop(df.columns[[-1,-2]],axis=1)
 
         df.to_csv(self.PATH + 'catch_highest/data/final_result/{fromdate}_{todate}_{lower_limit}_company_profit_with_time.csv'.format(fromdate = fromdate, todate=todate, lower_limit=lower_limit), encoding='utf-8-sig')
 
@@ -383,4 +390,4 @@ if __name__ == "__main__":
     # if backtest.InitPlusCheck() == False:
     #     exit()
 
-    target_time, profit = backtest.time_profit_extract(fromdate=202009, todate = 202011, lower_limit = -3, starttime=901, priority=True, down=False)
+    target_time, profit = backtest.time_profit_extract(fromdate=202009, todate = 202011, lower_limit = -30, starttime=901, priority=True, down=False, single=True)
