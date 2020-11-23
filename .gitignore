@@ -4,6 +4,12 @@
 **/.DS_Store
 **/._.DS_Store
 
+# config
+config
+**/config
+pw.txt
+**/pw.txt
+
 # jupyter notebook
 .ipynb_checkpoints
 **/.ipynb_checkpoints

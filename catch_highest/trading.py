@@ -176,6 +176,8 @@ if __name__ == "__main__":
 
     print(stock_dict)
     #매도 주문
+    #분할 매도
+
     # while first_sellStock:
     #     current_time = str(datetime.now().hour)+':'+str(datetime.now().minute)+':'+str(datetime.now().second)
     #     if current_time == '9:6:0':
@@ -185,9 +187,9 @@ if __name__ == "__main__":
     #             stock_dict[key] = value - new_value
     #         first_sellStock = False
 
-    while second_sellStock:
+    while sellStock:
         current_time = str(datetime.now().hour)+':'+str(datetime.now().minute)+':'+str(datetime.now().second)
         if current_time == '9:6:0':
             for key, value in stock_dict.items():
                 catchhighest.sellOrder(key, value)
-            second_sellStock = False
+            sellStock = False
