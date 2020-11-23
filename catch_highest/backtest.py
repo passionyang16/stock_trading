@@ -363,4 +363,4 @@ if __name__ == "__main__":
     # if backtest.InitPlusCheck() == False:
     #     exit()
 
-    target_time, profit = backtest.time_profit_extract(fromdate=202009, todate = 202011, lower_limit = -3, starttime=901, priority=True, down=False)
+    target_time, profit = backtest.time_profit_extract(fromdate=202001, todate = 202011, lower_limit = -3, starttime=901, priority=True, down=False)

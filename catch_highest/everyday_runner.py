@@ -20,8 +20,8 @@ if __name__ == "__main__":
     # backtest.get_minute_stock(date_company, entire_code, int(backtest.today))
 
     # 특정 날짜 빼먹었을 때 데이터 축적
-    code = ['A004835']
-    specific_date = '20201112'
+    code = ['A003495']
+    specific_date = '20201117'
     date_company = pd.DataFrame([[specific_date,code]], columns = ['내일날짜','상한가다음날'])
     backtest.get_minute_stock(date_company, entire_code, int(specific_date))
 
