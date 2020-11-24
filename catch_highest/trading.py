@@ -93,7 +93,7 @@ class CatchHighest:
         curData['전일종가'] = self.objStockMst.GetHeaderValue(10)  # 전일종가
         #추후 사용예정
         #curData['예상체결가'] = self.objStockMst.GetHeaderValue(55) # 예상체결가
-        curData['매수금액'] = (curData['예수금']) // num
+        curData['매수금액'] = (curData['예수금']//5) // num
         curData['수량'] = curData['매수금액'] // (curData['전일종가']*1.3)
         
         return curData
@@ -166,7 +166,7 @@ if __name__ == "__main__":
     #매수 주문
     while buyStock:
         current_time = str(datetime.now().hour)+':'+str(datetime.now().minute)+':'+str(datetime.now().second)
-        if current_time == '8:55:30':
+        if current_time == '8:58:30':
             for code in codes:
                 curData = catchhighest.request(code, len(codes))
                 print(curData)
